@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}{{ election.name }}{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="empty-state">
+    <h3>No election data available.</h3>
+    <p>Election data has not been uploaded by the administrator yet.</p>
+  </div>
+</section>
+{% endblock %}

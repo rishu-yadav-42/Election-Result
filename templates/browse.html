@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}{{ type_label }} — India Election Analytics{% endblock %}
+{% block content %}
+<section class="section">
+  <h1 class="page-title">{{ type_label|upper }} ELECTIONS</h1>
+
+  {% if not selected_state %}
+    <h2 class="section-title">Select State</h2>
+    {% if states %}
+      <div class="state-grid">
+        {% for s in states %}
+          <a class="state-card" href="?state={{ slugify(s.name) }}">{{ s.name }}</a>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <h3>No election data available.</h3>
+        <p>Election data has not been uploaded by the administrator yet.</p>
+      </div>
+    {% endif %}
+  {% else %}
+    <p><a class="btn btn-small btn-secondary" href="{{ request.path }}">← All States</a></p>
+    <h2 class="section-title">{{ selected_state.name }} — Select Election Year</h2>
+    {% if years %}
+      <div class="state-grid">
+        {% for y in years %}
+          <a class="state-card year-card"
+             href="/summary/{{ 'lok-sabha' if type_key == 'lok_sabha' else 'vidhan-sabha' }}/{{ selected_slug }}/{{ y }}">
+            {{ y }}
+            <span>Party-wise Results</span>
+          </a>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <h3>No election data available.</h3>
+        <p>Election data has not been uploaded by the administrator yet.</p>
+      </div>
+    {% endif %}
+  {% endif %}
+
+  {% if type_key == 'lok_sabha' and national_years %}
+    <h2 class="section-title">All-India (All States) Summary</h2>
+    <div class="state-grid">
+      {% for y in national_years %}
+        <a class="state-card year-card" href="/summary/lok-sabha/{{ y }}">
+          {{ y }}
+          <span>National Party-wise Results</span>
+        </a>
+      {% endfor %}
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

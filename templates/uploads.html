@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}Upload History{% endblock %}
+{% block content %}
+<section class="section">
+  <h1 class="page-title">UPLOAD HISTORY</h1>
+  {% if uploads %}
+  <div class="table-card">
+    <div class="table-scroll">
+    <table class="data-table">
+      <thead><tr><th>#</th><th>File</th><th>Election</th><th>Records</th><th>Uploaded At</th></tr></thead>
+      <tbody>
+        {% for u in uploads %}
+        <tr>
+          <td>{{ u.id }}</td>
+          <td>{{ u.filename }}</td>
+          <td>{{ u.election.name if u.election else '-' }}</td>
+          <td>{{ u.record_count }}</td>
+          <td>{{ u.uploaded_at.strftime('%d %b %Y %H:%M') }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    </div>
+  </div>
+  {% else %}
+  <div class="empty-state"><h3>No uploads yet</h3><p>Upload a dataset from the Admin Dashboard.</p></div>
+  {% endif %}
+  <div class="form-actions"><a class="btn btn-secondary" href="{{ url_for('admin.dashboard') }}">← Back</a></div>
+</section>
+{% endblock %}

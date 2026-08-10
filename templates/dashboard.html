@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% block title %}{{ election.name }} Dashboard{% endblock %}
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"
+        integrity="sha384-9nhczxUqK87bcKHh20fSQcTGD4qq5GhayNYSYWqwBkINBhOfQLg/P5HG5lF1urn4"
+        crossorigin="anonymous"></script>
+{% endblock %}
+{% block content %}
+<div id="dashboard-root"
+     data-election-id="{{ election_ids }}"
+     data-election-type="{{ election.election_type }}"></div>
+
+<section class="dash-body">
+  <header class="dash-header">
+    <h1>{{ dash_title }}</h1>
+    <p class="dash-sub">{{ dash_subtitle }}</p>
+  </header>
+
+  <!-- Filters -->
+  <div class="card filter-bar">
+    <div class="filter-item">
+      <label>State</label>
+      <input type="text" value="{{ election.state.name }}" disabled>
+    </div>
+    <div class="filter-item">
+      <label>Election Year</label>
+      <input type="text" value="{{ election.year }}" disabled>
+    </div>
+    <div class="filter-item">
+      <label>{{ code_label }}</label>
+      <input type="text" id="filterCode" placeholder="e.g. 333" autocomplete="off">
+      <div class="autocomplete" id="codeAutocomplete"></div>
+    </div>
+    <div class="filter-item">
+      <label>Constituency Name</label>
+      <input type="text" id="filterName" placeholder="Enter Constituency" autocomplete="off">
+    </div>
+    <div class="filter-item">
+      <label>Party</label>
+      <select id="filterParty"><option value="">All Parties</option></select>
+    </div>
+    <div class="filter-actions">
+      <button class="btn btn-primary" id="applyFilters">Apply</button>
+      <button class="btn btn-secondary" id="resetFilters">Reset Filters</button>
+    </div>
+  </div>
+
+  <div id="dashStatus" class="muted dash-status">Loading dashboard…</div>
+
+  <!-- KPI cards -->
+  <div class="kpi-grid" id="kpiGrid"></div>
+
+  <!-- Dynamic party seat cards -->
+  <div class="party-cards" id="partyCards"></div>
+
+  <!-- Charts -->
+  <div class="chart-grid">
+    <div class="card chart-card"><h3>Party-wise Seats Won <span class="hint">(click a bar to filter)</span></h3><div class="chart-wrap"><canvas id="chartSeats"></canvas></div></div>
+    <div class="card chart-card"><h3>Party-wise Vote Share (%)</h3><div class="chart-wrap"><canvas id="chartVoteShare"></canvas></div></div>
+    <div class="card chart-card"><h3>Top 10 Highest Winning Margins</h3><div class="chart-wrap"><canvas id="chartTopMargins"></canvas></div></div>
+    <div class="card chart-card"><h3>Top 10 Lowest Winning Margins</h3><div class="chart-wrap"><canvas id="chartBottomMargins"></canvas></div></div>
+    <div class="card chart-card"><h3>Candidate-wise Winning Votes</h3><div class="chart-wrap"><canvas id="chartWinnerVotes"></canvas></div></div>
+    <div class="card chart-card"><h3>Winner Party vs Winning Margin</h3><div class="chart-wrap"><canvas id="chartMarginParty"></canvas></div></div>
+    <div class="card chart-card"><h3>Party-wise Total Votes</h3><div class="chart-wrap"><canvas id="chartPartyVotes"></canvas></div></div>
+    <div class="card chart-card"><h3>Candidate Performance (Top 10 by Votes)</h3><div class="chart-wrap"><canvas id="chartCandidatePerf"></canvas></div></div>
+    <div class="card chart-card" id="stateWiseCard" hidden><h3>State-wise Seats</h3><div class="chart-wrap"><canvas id="chartStateWise"></canvas></div></div>
+  </div>
+
+  <!-- Constituency result (shown when one constituency matches) -->
+  <section class="card" id="constituencyDetail" hidden></section>
+
+  <!-- Results table -->
+  <section class="card">
+    <h3>Constituency-wise Results</h3>
+    <input type="text" id="tableSearch" class="table-search" placeholder="Filter table by constituency, candidate or party…">
+    <div class="table-scroll">
+      <table class="data-table" id="resultsTable">
+        <thead>
+          <tr>
+            <th>{{ code_label }}</th><th>Constituency</th><th>Winner</th><th>Party</th>
+            <th>Winner Votes</th><th>Runner-up</th><th>Margin</th><th>Winner Vote %</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+<script src="{{ url_for('static', filename='js/filters.js') }}"></script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

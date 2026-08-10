@@ -1,0 +1,8 @@
+Flask
+Flask-SQLAlchemy
+Flask-WTF
+Pandas
+OpenPyXL
+xlrd
+Werkzeug
+python-dotenv

@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}Validation Results{% endblock %}
+{% block content %}
+<section class="section narrow">
+  <h1 class="page-title">DATA VALIDATION</h1>
+  <p class="muted">File: <strong>{{ filename }}</strong></p>
+
+  <div class="stat-grid">
+    <div class="stat-card"><div class="stat-value">{{ report.total }}</div><div class="stat-label">Records Found</div></div>
+    <div class="stat-card good"><div class="stat-value">{{ report.valid }}</div><div class="stat-label">Valid Records</div></div>
+    <div class="stat-card bad"><div class="stat-value">{{ report.errors|length }}</div><div class="stat-label">Errors</div></div>
+    <div class="stat-card warn"><div class="stat-value">{{ report.warnings|length }}</div><div class="stat-label">Warnings</div></div>
+  </div>
+
+  {% if report.errors %}
+  <div class="panel">
+    <h3>⚠️ Errors (affected rows will be skipped)</h3>
+    <ul>{% for e in report.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+  </div>
+  {% endif %}
+
+  {% if report.warnings %}
+  <div class="panel">
+    <h3>ℹ️ Warnings</h3>
+    <ul>{% for w in report.warnings %}<li>{{ w }}</li>{% endfor %}</ul>
+  </div>
+  {% endif %}
+
+  <div class="panel">
+    {% if report.valid > 0 %}
+      <p><strong>{{ report.valid }}</strong> record(s) are ready to import.</p>
+      <form method="POST" action="{{ url_for('admin.upload_import') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">✅ Import Data &amp; Generate Dashboard</button>
+          <a href="{{ url_for('admin.upload_cancel') }}" class="btn btn-secondary">Cancel</a>
+        </div>
+      </form>
+    {% else %}
+      <p>No valid records to import. Please go back and adjust the file or mapping.</p>
+      <a href="{{ url_for('admin.upload') }}" class="btn btn-primary">Back to Upload</a>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

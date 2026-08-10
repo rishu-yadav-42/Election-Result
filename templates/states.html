@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}States — India Election Analytics{% endblock %}
+{% block content %}
+<section class="section">
+  <h1 class="page-title">STATES WITH AVAILABLE DATA</h1>
+  {% if items %}
+    <div class="state-grid">
+      {% for item in items %}
+        <div class="state-card static">
+          {{ item.state.name }}
+          <span>{{ item.count }} election(s) uploaded</span>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <h3>No election data available.</h3>
+      <p>Election data has not been uploaded by the administrator yet.</p>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

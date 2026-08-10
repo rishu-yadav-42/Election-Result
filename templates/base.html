@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <title>{% block title %}India Election Analytics{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="{{ url_for('dashboard.index') }}" class="brand">
+        <span class="brand-mark">🗳️</span> INDIA ELECTION ANALYTICS
+      </a>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">☰</button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="{{ url_for('dashboard.index') }}">Home</a></li>
+        <li><a href="/lok-sabha">Lok Sabha</a></li>
+        <li><a href="/vidhan-sabha">Vidhan Sabha</a></li>
+        <li><a href="{{ url_for('dashboard.states_page') }}">States</a></li>
+        <li><a href="{{ url_for('dashboard.about') }}">About</a></li>
+        {% if session.get('admin_logged_in') %}
+          <li><a href="{{ url_for('admin.dashboard') }}" class="nav-admin">Admin Panel</a></li>
+          <li><a href="{{ url_for('auth.logout') }}" class="nav-admin">Logout</a></li>
+        {% else %}
+          <li><a href="{{ url_for('auth.login') }}" class="nav-admin">Admin Login</a></li>
+        {% endif %}
+      </ul>
+    </div>
+  </nav>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-container">
+        {% for category, message in messages %}
+          <div class="flash flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="footer">
+    <p>India Election Analytics — dashboards are generated dynamically from datasets uploaded by the Administrator.</p>
+    <p class="footer-note">Data shown here is only as provided by uploaded datasets. Not an official Government of India portal.</p>
+  </footer>
+
+  <script>
+    document.getElementById('navToggle').addEventListener('click', function () {
+      document.getElementById('navLinks').classList.toggle('open');
+    });
+  </script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

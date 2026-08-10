@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }}{% endblock %}
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"
+        integrity="sha384-9nhczxUqK87bcKHh20fSQcTGD4qq5GhayNYSYWqwBkINBhOfQLg/P5HG5lF1urn4"
+        crossorigin="anonymous"></script>
+{% endblock %}
+{% block content %}
+<section class="section">
+  <header class="dash-header">
+    <h1>{{ title }}</h1>
+    <p class="dash-sub">{{ subtitle }}</p>
+  </header>
+
+  <div class="form-actions">
+    <a class="btn btn-primary" href="{{ dashboard_url }}">Open Full Dashboard →</a>
+    <a class="btn btn-secondary" href="javascript:history.back()">← Back</a>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="stat-card"><div class="stat-value">{{ '{:,}'.format(payload.kpis.total_seats) }}</div><div class="stat-label">Total Seats</div></div>
+    <div class="stat-card"><div class="stat-value">{{ '{:,}'.format(payload.kpis.total_votes) }}</div><div class="stat-label">Total Votes</div></div>
+    <div class="stat-card"><div class="stat-value" style="font-size:1.15rem;padding-top:0.5rem;">{{ payload.kpis.winner_party }}</div><div class="stat-label">Leading Party</div></div>
+  </div>
+
+  <h2 class="section-title">Party-wise Seats Won</h2>
+  <div class="party-cards">
+    {% for p in payload.party_seats %}
+    <div class="party-card" style="border-top:5px solid {{ p.color }}">
+      <div class="party-head">
+        {% if p.logo %}
+          <img class="party-logo" src="{{ p.logo }}" alt="{{ p.label }} logo" title="{{ p.label }}">
+        {% else %}
+          <span class="party-logo party-symbol-badge" style="background:{{ p.color }}" title="{{ p.label }}">{{ p.label[:3]|upper }}</span>
+        {% endif %}
+        <span class="party-name">{{ p.label }}</span>
+      </div>
+      <div class="party-seats">{{ p.seats }} {% if p.seats == 1 %}Seat{% else %}Seats{% endif %}</div>
+      <div class="party-sub">Seats Won</div>
+      <div class="party-votes">{{ '{:,}'.format(p.votes or 0) }} votes · {{ p.pct or 0 }}% Vote Share</div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="chart-grid">
+    <div class="card chart-card">
+      <h3>SEATS WON BY PARTY</h3>
+      <div class="chart-box"><canvas id="sumSeats"></canvas></div>
+    </div>
+    <div class="card chart-card">
+      <h3>SEAT SHARE</h3>
+      <div class="chart-box"><canvas id="sumSeatShare"></canvas></div>
+    </div>
+    <div class="card chart-card">
+      <h3>VOTE SHARE</h3>
+      <div class="chart-box"><canvas id="sumVoteShare"></canvas></div>
+    </div>
+    {% if payload.state_wise|length > 1 %}
+    <div class="card chart-card">
+      <h3>STATE-WISE SEATS</h3>
+      <div class="chart-box"><canvas id="sumStateWise"></canvas></div>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+<script>
+  const DATA = {{ payload | tojson }};
+  document.addEventListener('DOMContentLoaded', () => {
+    const seats = DATA.party_seats || [];
+    const logos = {};
+    seats.forEach((p) => { if (p.logo) logos[p.label] = p.logo; });
+    (DATA.party_vote_share || []).forEach((p) => { if (p.logo) logos[p.label] = p.logo; });
+    makeBarChart('sumSeats', seats.map((p) => p.label), seats.map((p) => p.seats),
+      { label: 'Seats', colors: seats.map((p) => p.color), logos });
+    makeDoughnutChart('sumSeatShare', seats.map((p) => p.label), seats.map((p) => p.seats),
+      { colors: seats.map((p) => p.color), logos });
+    makeDoughnutChart('sumVoteShare', (DATA.party_vote_share || []).map((p) => p.label),
+      (DATA.party_vote_share || []).map((p) => p.pct),
+      { colors: (DATA.party_vote_share || []).map((p) => p.color), logos });
+    if ((DATA.state_wise || []).length > 1) {
+      makeBarChart('sumStateWise', DATA.state_wise.map((s) => s.state),
+        DATA.state_wise.map((s) => s.seats), { label: 'Seats' });
+    }
+  });
+</script>
+{% endblock %}

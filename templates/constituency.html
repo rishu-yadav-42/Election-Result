@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% block title %}{{ detail.name }} — {{ election.name }}{% endblock %}
+{% macro party_chip(c) -%}
+<span class="cell-party">
+  {% if c.logo %}
+    <img class="party-logo" src="{{ c.logo }}" alt="{{ c.party }} logo">
+  {% else %}
+    <span class="party-logo party-symbol-badge" style="background:{{ c.color }}">{{ c.party[:3]|upper }}</span>
+  {% endif %}
+  <span>{{ c.party }}</span>
+</span>
+{%- endmacro %}
+{% block content %}
+<section class="section">
+  <header class="dash-header">
+    <h1>CONSTITUENCY RESULT</h1>
+    <p class="dash-sub">{{ detail.name }} · {{ detail.type }} Code {{ detail.code }} · {{ detail.state }} · {{ detail.year }}</p>
+  </header>
+
+  <div class="podium">
+    {% if detail.winner %}
+    <div class="podium-card gold">
+      <div class="podium-label">WINNER</div>
+      <div class="podium-party">{{ party_chip(detail.winner) }}</div>
+      <h3>{{ detail.winner.candidate }}</h3>
+      <p class="podium-votes">{{ '{:,}'.format(detail.winner.votes) }} votes · {{ detail.winner.pct }}%</p>
+    </div>
+    {% endif %}
+    {% if detail.runner_up %}
+    <div class="podium-card silver">
+      <div class="podium-label">RUNNER-UP</div>
+      <div class="podium-party">{{ party_chip(detail.runner_up) }}</div>
+      <h3>{{ detail.runner_up.candidate }}</h3>
+      <p class="podium-votes">{{ '{:,}'.format(detail.runner_up.votes) }} votes · {{ detail.runner_up.pct }}%</p>
+    </div>
+    {% endif %}
+    {% if detail.third %}
+    <div class="podium-card bronze">
+      <div class="podium-label">THIRD CANDIDATE</div>
+      <div class="podium-party">{{ party_chip(detail.third) }}</div>
+      <h3>{{ detail.third.candidate }}</h3>
+      <p class="podium-votes">{{ '{:,}'.format(detail.third.votes) }} votes · {{ detail.third.pct }}%</p>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat-card"><div class="stat-value">{{ '{:,}'.format(detail.margin) }}</div><div class="stat-label">Winning Margin</div></div>
+    <div class="stat-card"><div class="stat-value">{{ '{:,}'.format(detail.total_votes) }}</div><div class="stat-label">Total Votes</div></div>
+    <div class="stat-card"><div class="stat-value">{{ detail.winner.pct }}%</div><div class="stat-label">Winner Vote Share</div></div>
+    <div class="stat-card"><div class="stat-value">{{ detail.candidates|length }}</div><div class="stat-label">Candidates</div></div>
+  </div>
+
+  <div class="card">
+    <h3>All Candidates</h3>
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead><tr><th>Rank</th><th>Candidate</th><th>Party</th><th>Votes</th><th>Vote %</th></tr></thead>
+        <tbody>
+          {% for c in detail.candidates %}
+          <tr {% if c.is_winner %}class="winner-row"{% endif %}>
+            <td>{{ c.rank }}</td>
+            <td>{{ c.candidate }}</td>
+            <td>{{ party_chip(c) }}</td>
+            <td>{{ '{:,}'.format(c.votes) }}</td>
+            <td>{{ c.pct }}%</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="form-actions">
+    {% if election.election_type == 'lok_sabha' %}
+      <a class="btn btn-secondary" href="/dashboard/lok-sabha/{{ slugify(election.state.name) }}/{{ election.year }}">← Back to Dashboard</a>
+    {% else %}
+      <a class="btn btn-secondary" href="/dashboard/vidhan-sabha/{{ slugify(election.state.name) }}/{{ election.year }}">← Back to Dashboard</a>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

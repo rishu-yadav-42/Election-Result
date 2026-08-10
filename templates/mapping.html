@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block title %}Column Mapping{% endblock %}
+{% block content %}
+<section class="section">
+  <h1 class="page-title">COLUMN MAPPING</h1>
+  <p class="muted">File: <strong>{{ filename }}</strong> — {{ total_rows }} rows detected.
+     Format: <strong>{% if dataset_format == 'summary' %}Constituency Summary (one row per constituency){% else %}Candidate level (one row per candidate){% endif %}</strong>.
+     Map each uploaded column to a system column, then validate.</p>
+
+  <div class="panel">
+    <form method="POST" action="{{ url_for('admin.upload_validate') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="columns" value='{{ columns|tojson }}'>
+
+      <table class="data-table mapping-table">
+        <thead><tr><th>Uploaded Column</th><th></th><th>System Column</th></tr></thead>
+        <tbody>
+          {% for col in columns %}
+          <tr>
+            <td><code>{{ col }}</code></td>
+            <td class="arrow">→</td>
+            <td>
+              <select name="map__{{ loop.index0 }}">
+                <option value="">— Ignore this column —</option>
+                {% for key, label, required in system_columns %}
+                  <option value="{{ key }}" {% if suggested.get(col) == key %}selected{% endif %}>
+                    {{ label }}{% if required %} *{% endif %}
+                  </option>
+                {% endfor %}
+              </select>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <p class="muted">* Required mappings:
+        {% if dataset_format == 'summary' %}Constituency Code, Constituency Name, Winner, Winner Party, Winner Votes.
+        {% else %}Constituency Code, Constituency Name, Candidate, Party, Votes.{% endif %}</p>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Validate &amp; Continue</button>
+        <a href="{{ url_for('admin.upload_cancel') }}" class="btn btn-secondary">Cancel Upload</a>
+      </div>
+    </form>
+  </div>
+
+  <div class="panel">
+    <h3>Data Preview (first 10 rows)</h3>
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead><tr>{% for col in columns %}<th>{{ col }}</th>{% endfor %}</tr></thead>
+        <tbody>
+          {% for row in preview %}
+          <tr>{% for cell in row %}<td>{{ cell }}</td>{% endfor %}</tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{% endblock %}

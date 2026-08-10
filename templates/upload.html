@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block title %}Upload Dataset{% endblock %}
+{% block content %}
+<section class="section narrow">
+  <h1 class="page-title">UPLOAD DATASET</h1>
+  <div class="panel">
+    <p class="muted">Select the election details, then upload a <strong>.csv</strong>, <strong>.xlsx</strong> or <strong>.xls</strong> file.
+      The dashboard for this election is generated automatically after a successful import.</p>
+
+    <form method="POST" enctype="multipart/form-data">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div class="form-group">
+        <label>Election Type</label>
+        <select name="election_type" required>
+          <option value="lok_sabha">Lok Sabha</option>
+          <option value="vidhan_sabha" selected>Vidhan Sabha</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>State</label>
+        <select name="state_id" required>
+          <option value="">Select State</option>
+          {% for s in states %}<option value="{{ s.id }}">{{ s.name }}</option>{% endfor %}
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Election Year</label>
+        <input type="number" name="year" min="1950" max="2100" placeholder="e.g. 2022" required>
+      </div>
+
+      <div class="form-group">
+        <label>Dataset File</label>
+        <input type="file" name="dataset" accept=".csv,.xlsx,.xls" required>
+      </div>
+
+      <div class="form-group">
+        <label>Dataset Format</label>
+        <select name="dataset_format">
+          <option value="auto" selected>Auto-detect</option>
+          <option value="candidate">One row per candidate (Candidate / Party / Votes)</option>
+          <option value="summary">One row per constituency (Winner / Runner-up / Third)</option>
+        </select>
+        <p class="muted small">Use the summary format for sheets whose columns are
+          AC Code, Constituency, Winner, Winner Party, Winner Votes, Runner-up, …, Margin.</p>
+      </div>
+
+      <div class="form-group checkbox-group">
+        <label><input type="checkbox" name="replace" value="1"> Replace existing data if this election already has records</label>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Continue → Column Mapping</button>
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary">Cancel</a>
+      </div>
+    </form>
+  </div>
+
+  {% if elections %}
+  <div class="panel">
+    <h3>Existing Elections</h3>
+    <table class="data-table">
+      <thead><tr><th>Election</th><th>Type</th><th>Year</th></tr></thead>
+      <tbody>
+        {% for e in elections %}
+        <tr><td>{{ e.name }}</td><td>{{ e.type_label }}</td><td>{{ e.year }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

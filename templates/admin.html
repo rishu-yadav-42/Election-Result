@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block content %}
+<section class="section">
+  <h1 class="page-title">ADMIN DASHBOARD</h1>
+
+  <div class="stat-grid">
+    <div class="stat-card"><div class="stat-value">{{ '{:,}'.format(stats.total_elections) }}</div><div class="stat-label">Total Elections</div></div>
+    <div class="stat-card"><div class="stat-value">{{ '{:,}'.format(stats.total_states) }}</div><div class="stat-label">Total States</div></div>
+    <div class="stat-card"><div class="stat-value">{{ '{:,}'.format(stats.total_candidates) }}</div><div class="stat-label">Total Records</div></div>
+    <div class="stat-card"><div class="stat-value">{{ '{:,}'.format(stats.total_constituencies) }}</div><div class="stat-label">Total Constituencies</div></div>
+    <div class="stat-card"><div class="stat-value">{{ '{:,}'.format(stats.total_votes) }}</div><div class="stat-label">Total Votes</div></div>
+  </div>
+
+  <div class="action-grid">
+    <a class="btn btn-primary" href="{{ url_for('admin.add_election') }}">➕ Add Election</a>
+    <a class="btn btn-primary" href="{{ url_for('admin.upload') }}">⬆️ Upload Dataset</a>
+    <a class="btn btn-secondary" href="{{ url_for('admin.elections') }}">🗂️ Manage Elections</a>
+    <a class="btn btn-secondary" href="{{ url_for('admin.upload_history') }}">🕘 Upload History</a>
+    <a class="btn btn-danger" href="{{ url_for('admin.elections') }}">🗑️ Delete Election</a>
+    <a class="btn btn-secondary" href="{{ url_for('auth.logout') }}">🚪 Logout</a>
+  </div>
+
+  <div class="two-col">
+    <div class="panel">
+      <h3>Recent Elections</h3>
+      {% if elections %}
+        <table class="data-table">
+          <thead><tr><th>Name</th><th>Type</th><th>Year</th></tr></thead>
+          <tbody>
+            {% for e in elections %}
+            <tr><td>{{ e.name }}</td><td>{{ e.type_label }}</td><td>{{ e.year }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p class="muted">No elections created yet. Click "Add Election" or "Upload Dataset" to begin.</p>
+      {% endif %}
+    </div>
+    <div class="panel">
+      <h3>Recent Uploads</h3>
+      {% if recent_uploads %}
+        <table class="data-table">
+          <thead><tr><th>File</th><th>Election</th><th>Records</th><th>When</th></tr></thead>
+          <tbody>
+            {% for u in recent_uploads %}
+            <tr>
+              <td>{{ u.filename }}</td>
+              <td>{{ u.election.name if u.election else '-' }}</td>
+              <td>{{ u.record_count }}</td>
+              <td>{{ u.uploaded_at.strftime('%d %b %Y %H:%M') }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p class="muted">No datasets uploaded yet.</p>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}

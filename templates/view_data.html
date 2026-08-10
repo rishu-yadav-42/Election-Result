@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block title %}View Data — {{ election.name }}{% endblock %}
+{% block content %}
+<section class="section">
+  <h1 class="page-title">{{ election.name|upper }} — RECORDS</h1>
+
+  <div class="table-card">
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead>
+          <tr><th>Code</th><th>Constituency</th><th>Candidate</th><th>Party</th><th>Votes</th><th>Rank</th><th>Winner</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+          {% for r in pagination.items %}
+          <tr>
+            <td>{{ r.constituency.code }}</td>
+            <td>{{ r.constituency.name }}</td>
+            <td>{{ r.candidate.name }}</td>
+            <td>{{ r.candidate.party.name }}</td>
+            <td>
+              <form method="POST" action="{{ url_for('admin.edit_record', record_id=r.id) }}" class="inline-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="number" name="votes" value="{{ r.votes }}" min="0" class="input-small">
+                <input type="number" name="rank" value="{{ r.rank or '' }}" min="1" class="input-small" placeholder="Rank">
+                <button type="submit" class="btn btn-small">Save</button>
+              </form>
+            </td>
+            <td>{{ r.rank or '-' }}</td>
+            <td>{{ '🏆' if r.is_winner else '' }}</td>
+            <td>
+              <form method="POST" action="{{ url_for('admin.delete_record', record_id=r.id) }}"
+                    onsubmit="return confirm('Delete this record?');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-small btn-danger">Delete</button>
+              </form>
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="8" class="muted">No records for this election.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {% if pagination.pages > 1 %}
+  <div class="pagination">
+    {% if pagination.has_prev %}
+      <a class="btn btn-small" href="?page={{ pagination.prev_num }}">← Previous</a>
+    {% endif %}
+    <span class="muted">Page {{ pagination.page }} of {{ pagination.pages }}</span>
+    {% if pagination.has_next %}
+      <a class="btn btn-small" href="?page={{ pagination.next_num }}">Next →</a>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <div class="form-actions">
+    <a class="btn btn-secondary" href="{{ url_for('admin.elections') }}">← Back to Elections</a>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}About — India Election Analytics{% endblock %}
+{% block content %}
+<section class="section narrow">
+  <h1 class="page-title">ABOUT</h1>
+  <div class="panel">
+    <p><strong>India Election Analytics</strong> is a data-driven platform for exploring
+      Lok Sabha and Vidhan Sabha election results.</p>
+    <p>Every dashboard on this platform is generated <em>dynamically</em> from datasets
+      uploaded by the Administrator. No election results are hardcoded. When the Admin
+      uploads a dataset for a state and year, a new dashboard automatically becomes
+      available to all users.</p>
+    <h3>How it works</h3>
+    <ol>
+      <li>Admin logs in and selects Election Type, State and Year.</li>
+      <li>Admin uploads an Excel/CSV dataset.</li>
+      <li>The system previews the data and the Admin maps the columns.</li>
+      <li>Data is validated and imported into the database.</li>
+      <li>The dashboard for that election becomes instantly available to users.</li>
+    </ol>
+    <p class="muted">This platform displays only the data provided through uploaded datasets
+      and is not an official Government of India or Election Commission portal.</p>
+  </div>
+</section>
+{% endblock %}

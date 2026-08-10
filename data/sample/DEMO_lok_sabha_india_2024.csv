@@ -1,0 +1,17 @@
+PC_Code,PC_Name,Candidate_Name,Party_Name,Total_Votes,Rank
+01,Demo North,Arjun Malhotra,BJP,612340,1
+01,Demo North,Seema Choudhary,INC,489210,2
+01,Demo North,Iqbal Hussain,SP,145600,3
+01,Demo North,Vandana Kumari,BSP,52300,4
+02,Demo Central,Neha Kapoor,INC,571890,1
+02,Demo Central,Rajat Sinha,BJP,556420,2
+02,Demo Central,Lokesh Yadav,SP,198750,3
+02,Demo Central,Gita Bai,BSP,38940,4
+03,Demo South,Manoj Pillai,BJP,588730,1
+03,Demo South,Ritu Aggarwal,INC,431200,2
+03,Demo South,Sadiq Sheikh,SP,167890,3
+03,Demo South,Harish Chandra,BSP,44670,4
+04,Demo East,Komal Reddy,SP,502340,1
+04,Demo East,Prakash Nair,BJP,498110,2
+04,Demo East,Divyanshi Mehra,INC,231450,3
+04,Demo East,Bhola Prasad,BSP,27890,4

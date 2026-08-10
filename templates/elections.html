@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block title %}Manage Elections{% endblock %}
+{% block content %}
+<section class="section">
+  <h1 class="page-title">MANAGE ELECTIONS</h1>
+  <div class="form-actions">
+    <a class="btn btn-primary" href="{{ url_for('admin.add_election') }}">➕ Add Election</a>
+    <a class="btn btn-primary" href="{{ url_for('admin.upload') }}">⬆️ Upload Dataset</a>
+  </div>
+
+  {% if details %}
+  <div class="table-card">
+    <div class="table-scroll">
+    <table class="data-table">
+      <thead>
+        <tr><th>Election</th><th>Type</th><th>State</th><th>Year</th><th>Constituencies</th><th>Records</th><th>Actions</th></tr>
+      </thead>
+      <tbody>
+        {% for d in details %}
+        <tr>
+          <td>{{ d.election.name }}</td>
+          <td>{{ d.election.type_label }}</td>
+          <td>{{ d.election.state.name }}</td>
+          <td>{{ d.election.year }}</td>
+          <td>{{ d.constituencies }}</td>
+          <td>{{ d.records }}</td>
+          <td class="row-actions">
+            <a class="btn btn-small" href="{{ url_for('admin.view_data', election_id=d.election.id) }}">View Data</a>
+            <a class="btn btn-small" href="{{ url_for('admin.upload') }}">Replace</a>
+            <form method="POST" action="{{ url_for('admin.delete_election', election_id=d.election.id) }}"
+                  onsubmit="return confirm('Delete {{ d.election.name }} and ALL of its data? This cannot be undone.');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="btn btn-small btn-danger">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    </div>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <h3>No elections yet</h3>
+    <p>Election data has not been uploaded by the administrator yet.</p>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

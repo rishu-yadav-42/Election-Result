@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% block title %}India Election Analytics — Home{% endblock %}
+{% block content %}
+<section class="hero">
+  <h1>India Election Data Analytics</h1>
+  <p class="subtitle">Explore Lok Sabha and Vidhan Sabha election results through interactive data analytics.</p>
+
+  <div class="election-cards">
+    <a class="election-card" href="/lok-sabha">
+      <div class="election-icon">
+        <svg class="election-svg-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="48" height="48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto; display: block;">
+          <!-- Dome of parliament -->
+          <path d="M12 48 C 12 24, 52 24, 52 48 Z" fill="#e0f2fe" stroke="#0891b2" />
+          <!-- Spire on top -->
+          <line x1="32" y1="20" x2="32" y2="10" stroke="#0891b2" />
+          <circle cx="32" cy="8" r="2" fill="#0891b2" />
+          <!-- Pillars -->
+          <line x1="20" y1="36" x2="20" y2="48" stroke="#0891b2" />
+          <line x1="26" y1="32" x2="26" y2="48" stroke="#0891b2" />
+          <line x1="32" y1="30" x2="32" y2="48" stroke="#0891b2" />
+          <line x1="38" y1="32" x2="38" y2="48" stroke="#0891b2" />
+          <line x1="44" y1="36" x2="44" y2="48" stroke="#0891b2" />
+          <!-- Steps/base -->
+          <rect x="8" y="48" width="48" height="6" rx="2" fill="#0891b2" stroke="#0891b2" />
+          <rect x="4" y="54" width="56" height="4" rx="1" fill="#0e7490" stroke="#0e7490" />
+        </svg>
+      </div>
+      <h2>LOK SABHA</h2>
+      <p>Explore Parliamentary Elections</p>
+      <span class="btn btn-primary">Explore Results</span>
+    </a>
+    <a class="election-card" href="/vidhan-sabha">
+      <div class="election-icon">
+        <svg class="election-svg-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="48" height="48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto; display: block;">
+          <!-- Temple/Assembly Pediment (Triangle roof) -->
+          <polygon points="32 10, 8 24, 56 24" fill="#e0f2fe" stroke="#0891b2" />
+          <!-- Columns -->
+          <line x1="16" y1="24" x2="16" y2="48" stroke="#0891b2" />
+          <line x1="24" y1="24" x2="24" y2="48" stroke="#0891b2" />
+          <line x1="32" y1="24" x2="32" y2="48" stroke="#0891b2" />
+          <line x1="40" y1="24" x2="40" y2="48" stroke="#0891b2" />
+          <line x1="48" y1="24" x2="48" y2="48" stroke="#0891b2" />
+          <!-- Base steps -->
+          <rect x="8" y="48" width="48" height="6" rx="2" fill="#0891b2" stroke="#0891b2" />
+          <rect x="4" y="54" width="56" height="4" rx="1" fill="#0e7490" stroke="#0e7490" />
+        </svg>
+      </div>
+      <h2>VIDHAN SABHA</h2>
+      <p>Explore State Assembly Elections</p>
+      <span class="btn btn-primary">Explore Results</span>
+    </a>
+  </div>
+</section>
+
+<section class="section">
+  <h2 class="section-title">Platform Statistics</h2>
+  <p class="section-note">Computed live from datasets uploaded by the Administrator.</p>
+  <div class="stat-grid">
+    <div class="stat-card"><div class="stat-value">{{ '{:,}'.format(stats.total_elections) }}</div><div class="stat-label">Total Elections</div></div>
+    <div class="stat-card"><div class="stat-value">{{ '{:,}'.format(stats.total_states) }}</div><div class="stat-label">Total States</div></div>
+    <div class="stat-card"><div class="stat-value">{{ '{:,}'.format(stats.total_constituencies) }}</div><div class="stat-label">Total Constituencies</div></div>
+    <div class="stat-card"><div class="stat-value">{{ '{:,}'.format(stats.total_candidates) }}</div><div class="stat-label">Total Candidate Records</div></div>
+    <div class="stat-card"><div class="stat-value">{{ '{:,}'.format(stats.total_votes) }}</div><div class="stat-label">Total Votes</div></div>
+  </div>
+</section>
+
+<section class="section">
+  <h2 class="section-title">Available Dashboards</h2>
+  {% if elections %}
+    <div class="table-card">
+      <div class="table-scroll">
+      <table class="data-table">
+        <thead><tr><th>Election</th><th>Type</th><th>State</th><th>Year</th><th></th></tr></thead>
+        <tbody>
+          {% for e in elections %}
+          <tr>
+            <td>{{ e.name }}</td>
+            <td>{{ e.type_label }}</td>
+            <td>{{ e.state.name }}</td>
+            <td>{{ e.year }}</td>
+            <td>
+              {% if e.election_type == 'lok_sabha' %}
+                <a class="btn btn-small" href="/dashboard/lok-sabha/{{ slugify(e.state.name) }}/{{ e.year }}">Open Dashboard</a>
+              {% else %}
+                <a class="btn btn-small" href="/dashboard/vidhan-sabha/{{ slugify(e.state.name) }}/{{ e.year }}">Open Dashboard</a>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      </div>
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <h3>No election data available.</h3>
+      <p>Election data has not been uploaded by the administrator yet.</p>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}
