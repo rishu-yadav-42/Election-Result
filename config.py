@@ -10,8 +10,11 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 class Config:
     SECRET_KEY = os.getenv('SECRET_KEY', 'change_this_secret')
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(
-        DATABASE_DIR, os.getenv('DATABASE_NAME', 'database.db'))
+    db_url = os.getenv('DATABASE_URL')
+    if db_url and db_url.startswith('postgres://'):
+        db_url = db_url.replace('postgres://', 'postgresql://', 1)
+    SQLALCHEMY_DATABASE_URI = db_url or ('sqlite:///' + os.path.join(
+        DATABASE_DIR, os.getenv('DATABASE_NAME', 'database.db')))
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     UPLOAD_FOLDER = UPLOAD_DIR
     MAX_CONTENT_LENGTH = 50 * 1024 * 1024  # 50 MB

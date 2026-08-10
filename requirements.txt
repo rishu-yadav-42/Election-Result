@@ -6,3 +6,4 @@ OpenPyXL
 xlrd
 Werkzeug
 python-dotenv
+psycopg2-binary
