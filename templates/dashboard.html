@@ -16,6 +16,9 @@
     <p class="dash-sub">{{ dash_subtitle }}</p>
   </header>
 
+  <!-- Executive Data Insights Section -->
+  <div class="insights-section" id="insightsBanner" hidden></div>
+
   <!-- Filters -->
   <div class="card filter-bar">
     <div class="filter-item">
@@ -45,6 +48,14 @@
     </div>
   </div>
 
+  <!-- Quick Preset Pills -->
+  <div class="preset-bar" id="presetBar">
+    <span class="preset-label">Quick Analytics Filters:</span>
+    <button type="button" class="preset-chip active" data-preset="all">All Seats</button>
+    <button type="button" class="preset-chip" data-preset="nail-biters">⚡ Nail-Biters (&lt;5k Margin)</button>
+    <button type="button" class="preset-chip" data-preset="landslides">🏆 Landslides (&gt;50k Margin)</button>
+  </div>
+
   <div id="dashStatus" class="muted dash-status">Loading dashboard…</div>
 
   <!-- KPI cards -->
@@ -57,8 +68,10 @@
   <div class="chart-grid">
     <div class="card chart-card"><h3>Party-wise Seats Won <span class="hint">(click a bar to filter)</span></h3><div class="chart-wrap"><canvas id="chartSeats"></canvas></div></div>
     <div class="card chart-card"><h3>Party-wise Vote Share (%)</h3><div class="chart-wrap"><canvas id="chartVoteShare"></canvas></div></div>
-    <div class="card chart-card"><h3>Top 10 Highest Winning Margins</h3><div class="chart-wrap"><canvas id="chartTopMargins"></canvas></div></div>
-    <div class="card chart-card"><h3>Top 10 Lowest Winning Margins</h3><div class="chart-wrap"><canvas id="chartBottomMargins"></canvas></div></div>
+    <div class="card chart-card"><h3>Seat Share vs Vote Share Comparison</h3><div class="chart-wrap"><canvas id="chartSeatVsVote"></canvas></div></div>
+    <div class="card chart-card"><h3>Victory Margin Range Distribution</h3><div class="chart-wrap"><canvas id="chartMarginDist"></canvas></div></div>
+    <div class="card chart-card"><h3>Top 10 Highest Winning Margins (Landslides)</h3><div class="chart-wrap"><canvas id="chartTopMargins"></canvas></div></div>
+    <div class="card chart-card"><h3>Top 10 Lowest Winning Margins (Nail-Biters)</h3><div class="chart-wrap"><canvas id="chartBottomMargins"></canvas></div></div>
     <div class="card chart-card"><h3>Candidate-wise Winning Votes</h3><div class="chart-wrap"><canvas id="chartWinnerVotes"></canvas></div></div>
     <div class="card chart-card"><h3>Winner Party vs Winning Margin</h3><div class="chart-wrap"><canvas id="chartMarginParty"></canvas></div></div>
     <div class="card chart-card"><h3>Party-wise Total Votes</h3><div class="chart-wrap"><canvas id="chartPartyVotes"></canvas></div></div>

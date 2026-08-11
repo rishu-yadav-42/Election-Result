@@ -156,6 +156,83 @@ def build_dashboard_data(elections, party=None, constituency_code=None, constitu
     state_wise = [{'state': st, 'seats': c} for st, c in
                   sorted(state_seat_counter.items(), key=lambda x: -x[1])]
 
+    # ---- Margin Range Distribution ----
+    margin_buckets = {
+        'Nail-Biter (< 5k)': 0,
+        'Close (5k - 20k)': 0,
+        'Decisive (20k - 50k)': 0,
+        'Landslide (> 50k)': 0,
+    }
+    for m in margins:
+        if m < 5000:
+            margin_buckets['Nail-Biter (< 5k)'] += 1
+        elif m < 20000:
+            margin_buckets['Close (5k - 20k)'] += 1
+        elif m < 50000:
+            margin_buckets['Decisive (20k - 50k)'] += 1
+        else:
+            margin_buckets['Landslide (> 50k)'] += 1
+
+    margin_distribution = [
+        {'label': k, 'count': v, 'pct': round(v / total_seats * 100, 1) if total_seats else 0}
+        for k, v in margin_buckets.items()
+    ]
+
+    # ---- Executive Data Insights ----
+    top_seat_party = party_seats[0] if party_seats else None
+    top_vote_party = party_vote_share[0] if party_vote_share else None
+    closest_s = min(summaries, key=lambda s: s['margin']) if summaries else None
+    largest_s = max(summaries, key=lambda s: s['margin']) if summaries else None
+    nail_biter_count = margin_buckets['Nail-Biter (< 5k)']
+
+    seat_vs_vote_comparison = []
+    vote_share_map = {p['label']: p['pct'] for p in party_vote_share}
+    for p in party_seats[:6]:  # Top 6 parties
+        s_pct = round(p['seats'] / total_seats * 100, 1) if total_seats else 0
+        v_pct = vote_share_map.get(p['label'], 0)
+        ratio = round(s_pct / v_pct, 2) if v_pct > 0 else 0
+        seat_vs_vote_comparison.append({
+            'label': p['label'],
+            'seats': p['seats'],
+            'seat_pct': s_pct,
+            'vote_pct': v_pct,
+            'conversion_ratio': ratio,
+            'color': p['color'],
+            'logo': p['logo'],
+        })
+
+    insights = {
+        'dominant_party': {
+            'name': top_seat_party['label'] if top_seat_party else '-',
+            'seats': top_seat_party['seats'] if top_seat_party else 0,
+            'seat_pct': round(top_seat_party['seats'] / total_seats * 100, 1) if (top_seat_party and total_seats) else 0,
+            'vote_pct': vote_share_map.get(top_seat_party['label'], 0) if top_seat_party else 0,
+            'color': top_seat_party['color'] if top_seat_party else '#64748b',
+            'logo': top_seat_party['logo'] if top_seat_party else None,
+        },
+        'closest_race': {
+            'constituency': closest_s['name'],
+            'code': closest_s['code'],
+            'winner': closest_s['winner'],
+            'winner_party': closest_s['winner_party'],
+            'runner_up': closest_s['runner_up'],
+            'runner_up_party': closest_s['runner_up_party'],
+            'margin': closest_s['margin'],
+            'color': party_color(closest_s['winner_party']),
+        } if closest_s else None,
+        'biggest_landslide': {
+            'constituency': largest_s['name'],
+            'code': largest_s['code'],
+            'winner': largest_s['winner'],
+            'winner_party': largest_s['winner_party'],
+            'margin': largest_s['margin'],
+            'color': party_color(largest_s['winner_party']),
+        } if largest_s else None,
+        'nail_biters_count': nail_biter_count,
+        'nail_biters_pct': round(nail_biter_count / total_seats * 100, 1) if total_seats else 0,
+        'conversion_leaders': seat_vs_vote_comparison,
+    }
+
     primary = elections[0]
     return {
         'election': {
@@ -168,6 +245,9 @@ def build_dashboard_data(elections, party=None, constituency_code=None, constitu
         },
         'is_multi': len(elections) > 1 or len(state_seat_counter) > 1,
         'kpis': kpis,
+        'insights': insights,
+        'margin_distribution': margin_distribution,
+        'seat_vs_vote_comparison': seat_vs_vote_comparison,
         'party_seats': party_seats,
         'party_vote_share': party_vote_share,
         'party_total_votes': [{'label': p['label'], 'votes': p['votes'], 'color': p['color']}

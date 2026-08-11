@@ -72,6 +72,7 @@ const Dashboard = (() => {
       if (!partyColors[p.label]) partyColors[p.label] = p.color || PALETTE[i % PALETTE.length];
       if (!partyLogos[p.label] && p.logo) partyLogos[p.label] = p.logo;
     });
+    renderInsights(data.insights);
     renderKpis(data.kpis);
     renderPartyCards(data.party_seats, data.party_vote_share || []);
     populatePartyFilter(data.parties);
@@ -81,15 +82,65 @@ const Dashboard = (() => {
     lastResults = data.results;
   }
 
+  function renderInsights(insights) {
+    const banner = document.getElementById('insightsBanner');
+    if (!insights || !banner) {
+      if (banner) banner.hidden = true;
+      return;
+    }
+    const dom = insights.dominant_party || {};
+    const close = insights.closest_race || {};
+    const land = insights.biggest_landslide || {};
+
+    banner.innerHTML = `
+      <div class="insights-grid">
+        <div class="insight-card highlight-dom" style="border-left-color: ${dom.color || '#0891b2'}">
+          <div class="insight-badge">DOMINANT PARTY</div>
+          <div class="insight-title">${partyLogoHtml(dom.name, dom.logo, dom.color)}<span>${dom.name}</span></div>
+          <div class="insight-body">
+            <strong>${dom.seats} Seats</strong> (${dom.seat_pct}% seat share) with <strong>${dom.vote_pct}%</strong> overall vote share.
+          </div>
+        </div>
+
+        ${close.constituency ? `
+        <div class="insight-card highlight-close">
+          <div class="insight-badge badge-danger">⚡ TIGHTEST BATTLEGROUND</div>
+          <div class="insight-title">${close.constituency} (${close.code})</div>
+          <div class="insight-body">
+            Winner: <strong>${close.winner}</strong> (${close.winner_party}) won by just <strong>${fmt(close.margin)} votes</strong> against ${close.runner_up}.
+          </div>
+        </div>` : ''}
+
+        ${land.constituency ? `
+        <div class="insight-card highlight-land">
+          <div class="insight-badge badge-gold">🏆 BIGGEST LANDSLIDE</div>
+          <div class="insight-title">${land.constituency} (${land.code})</div>
+          <div class="insight-body">
+            Winner: <strong>${land.winner}</strong> (${land.winner_party}) with massive lead of <strong>${fmt(land.margin)} votes</strong>.
+          </div>
+        </div>` : ''}
+
+        <div class="insight-card highlight-stat">
+          <div class="insight-badge badge-info">HIGH COMPETITIVENESS</div>
+          <div class="insight-title">${insights.nail_biters_count} High-Stakes Seats</div>
+          <div class="insight-body">
+            <strong>${insights.nail_biters_pct}%</strong> of constituencies were decided by under 5,000 votes (&lt; 5k margin).
+          </div>
+        </div>
+      </div>
+    `;
+    banner.hidden = false;
+  }
+
   function renderKpis(k) {
     const grid = document.getElementById('kpiGrid');
     grid.innerHTML = `
       <div class="stat-card"><div class="stat-value">${fmt(k.total_seats)}</div><div class="stat-label">Total Seats</div></div>
-      <div class="stat-card"><div class="stat-value">${fmt(k.total_votes)}</div><div class="stat-label">Total Votes</div></div>
+      <div class="stat-card"><div class="stat-value">${fmt(k.total_votes)}</div><div class="stat-label">Total Votes Polled</div></div>
       <div class="stat-card"><div class="stat-value">${fmt(k.total_candidates)}</div><div class="stat-label">Total Candidates</div></div>
-      <div class="stat-card"><div class="stat-value" style="font-size:1.15rem;padding-top:0.5rem;">${k.winner_party}</div><div class="stat-label">Winner Party</div></div>
-      <div class="stat-card"><div class="stat-value">${fmt(k.highest_margin)}</div><div class="stat-label">Highest Margin</div></div>
-      <div class="stat-card"><div class="stat-value">${fmt(k.average_margin)}</div><div class="stat-label">Average Margin</div></div>
+      <div class="stat-card"><div class="stat-value" style="font-size:1.15rem;padding-top:0.5rem;color:${partyColors[k.winner_party] || '#0891b2'};">${k.winner_party}</div><div class="stat-label">Winner Party</div></div>
+      <div class="stat-card good"><div class="stat-value">${fmt(k.highest_margin)}</div><div class="stat-label">Highest Margin</div></div>
+      <div class="stat-card warn"><div class="stat-value">${fmt(k.average_margin)}</div><div class="stat-label">Average Margin</div></div>
     `;
   }
 
@@ -129,8 +180,7 @@ const Dashboard = (() => {
     syncPartyDropdown();
   }
 
-  /* Custom party dropdown with actual party logos (the native <select> stays
-     hidden as the source of truth so filters.js keeps working). */
+  /* Custom party dropdown with actual party logos */
   let dropdownBuilt = false;
   function buildPartyDropdown() {
     if (dropdownBuilt) return;
@@ -237,6 +287,26 @@ const Dashboard = (() => {
         logos: partyLogos,
       });
 
+    if (data.seat_vs_vote_comparison && data.seat_vs_vote_comparison.length) {
+      makeGroupedBarChart('chartSeatVsVote',
+        data.seat_vs_vote_comparison.map((p) => p.label),
+        [
+          { label: 'Seat Share %', data: data.seat_vs_vote_comparison.map((p) => p.seat_pct), color: '#0891b2' },
+          { label: 'Vote Share %', data: data.seat_vs_vote_comparison.map((p) => p.vote_pct), color: '#f59e0b' },
+        ]);
+    }
+
+    if (data.margin_distribution && data.margin_distribution.length) {
+      makeBarChart('chartMarginDist',
+        data.margin_distribution.map((m) => m.label),
+        data.margin_distribution.map((m) => m.count),
+        {
+          label: 'Seats Count',
+          colors: ['#ef4444', '#f97316', '#0ea5e9', '#10b981'],
+          suffix: ' seats',
+        });
+    }
+
     makeBarChart('chartTopMargins',
       data.top_margins.map((m) => `${m.constituency}`),
       data.top_margins.map((m) => m.margin),
@@ -245,7 +315,7 @@ const Dashboard = (() => {
     makeBarChart('chartBottomMargins',
       data.bottom_margins.map((m) => `${m.constituency}`),
       data.bottom_margins.map((m) => m.margin),
-      { horizontal: true, label: 'Margin', logos: constLogos });
+      { horizontal: true, label: 'Margin', colors: data.bottom_margins.map(() => '#ef4444'), logos: constLogos });
 
     makeBarChart('chartWinnerVotes',
       data.top_winner_votes.map((w) => `${w.candidate} (${w.constituency})`),
@@ -385,9 +455,30 @@ const Dashboard = (() => {
     });
   }
 
+  function initPresetBar() {
+    const bar = document.getElementById('presetBar');
+    if (!bar) return;
+    const chips = bar.querySelectorAll('.preset-chip');
+    chips.forEach((chip) => {
+      chip.addEventListener('click', () => {
+        chips.forEach((c) => c.classList.remove('active'));
+        chip.classList.add('active');
+        const preset = chip.dataset.preset;
+        if (preset === 'nail-biters') {
+          renderTable(lastResults.filter((r) => r.margin < 5000));
+        } else if (preset === 'landslides') {
+          renderTable(lastResults.filter((r) => r.margin > 50000));
+        } else {
+          renderTable(lastResults);
+        }
+      });
+    });
+  }
+
   function init() {
     initDashboardFilters();
     initTableSearch();
+    initPresetBar();
     load();
   }
 
